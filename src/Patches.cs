@@ -1,54 +1,88 @@
 using System;
+using DiceModders.ModCore.Tools;
 
 namespace DiceModders.Cheats;
 
+using GameBuilding = DiceKingdoms.Game.Building;
+using GameGrid = DiceKingdoms.Game.IslandGrid;
+
+/// <summary>The game methods the cheats change. Each prefix runs the game's code unchanged unless its cheat is active.</summary>
 internal static class Patches
 {
-    // Cheats.get_Available (property getter) and Cheats.CheckAvailable (static) both gate the dev console.
-    internal static void ForceTrue(ref bool __result)
+    // The game calls these two very often (the AI and the automatic start placement try thousands of spots per building), so they are only in the
+    // game while their cheat is on: a patch costs a trip into C# on every call even when it does nothing.
+    private static PatchSwitch _unlocked, _buildAnywhere;
+
+    internal static void Install(Patcher patcher)
     {
-        if (Cheat.DevConsole.Value && CheatsGate.Unlocked) __result = true;
+        patcher.Patch("Cheats", "get_Available", typeof(Patches), postfix: nameof(DevConsole));
+        patcher.Patch("Cheats", "CheckAvailable", typeof(Patches), postfix: nameof(DevConsole));
+        _unlocked = patcher.Switch("BuildData", "Unlocked", typeof(Patches), prefix: nameof(Unlocked));
+        _buildAnywhere = patcher.Switch(typeof(GameGrid), nameof(GameGrid.CanPlaceBuilding), typeof(Patches), postfix: nameof(CanPlaceBuilding));
+        patcher.Patch("Player", "get_StartGameReady", typeof(Patches), prefix: nameof(StartGameReady));
+        patcher.Patch("Meteorite", "Execute", typeof(Patches), prefix: nameof(MeteorExecute));
+        patcher.Patch("IslandGrid", "MeteoriteNumberCastleTiles", typeof(Patches), postfix: nameof(CastleTiles));
+
+        Options.Unlocked.SettingChanged += (_, _) => Refresh();
+        Options.UnlockAllBuildings.SettingChanged += (_, _) => Refresh();
+        Options.BuildAnywhere.SettingChanged += (_, _) => Refresh();
     }
 
-    // BuildData.Unlocked(BuildingType)
-    internal static bool UnlockedPrefix(ref bool __result)
+    /// <summary>Puts the two switchable patches in line with the settings and the mod switch (called by those events).</summary>
+    internal static void Refresh()
     {
-        if (!CheatsGate.Unlocked || !Cheat.UnlockAllBuildings.On) return true;
-        __result = true;
-        return false; // skip original
+        if (_unlocked != null) _unlocked.On = Options.CheatsActive && Options.UnlockAllBuildings.Value;
+        if (_buildAnywhere != null) _buildAnywhere.On = Options.CheatsActive && Options.BuildAnywhere.Value;
     }
 
-    // IslandGrid.CanPlaceBuilding(Building) - the per-tile placement check.
-    internal static bool CanPlaceBuildingPrefix(ref bool __result)
+    // Cheats.get_Available / Cheats.CheckAvailable gate the game's dev console.
+    internal static void DevConsole(ref bool __result) { if (Options.CheatsActive && Options.DevConsole.Value) __result = true; }
+
+    // BuildData.Unlocked(BuildingType): only patched while "unlock all buildings" is on
+    internal static bool Unlocked(ref bool __result)
     {
-        if (!CheatsGate.Unlocked || !Cheat.BuildAnywhere.On) return true;
         __result = true;
         return false;
     }
 
-    // Player.get_StartGameReady - read by the lobby Start button.
-    internal static bool StartGameReadyPrefix(ref bool __result)
+    // IslandGrid.CanPlaceBuilding(Building): the game refuses a tile outside the island grid, under a building or its remains, on the wrong ground
+    // (land / water) or under nature. Build anywhere only overrides the ground and nature checks: a tile that already holds a building stays
+    // refused, because placing on it breaks the island ("building id used") and stops the game.
+    internal static void CanPlaceBuilding(GameGrid __instance, GameBuilding __0, ref bool __result)
     {
-        if (!Cheat.ForceLobbyReady.On) return true;
+        if (__result || __instance == null || __0 == null) return;   // only patched while "build anywhere" is on
+        try
+        {
+            var size = __instance.size;
+            var positions = __0.Positions();
+            var e = positions.GetEnumerator();
+            var walk = e.Cast<Il2CppSystem.Collections.IEnumerator>();
+            while (walk.MoveNext())
+            {
+                var p = e.Current;
+                if (p.x < 0 || p.y < 0 || p.x >= size.x || p.y >= size.y) return;
+                if (__instance.BuildingAt(p).HasValue || __instance.RemainsAt(p).HasValue) return;
+            }
+            __result = true;
+        }
+        catch (Exception ex) { Plugin.L.LogWarning("build anywhere: " + ex.Message); }
+    }
+
+    // Player.get_StartGameReady: read by the lobby Start button.
+    internal static bool StartGameReady(ref bool __result)
+    {
+        if (!Plugin.On || !Options.ForceLobbyReady.Value) return true;
         __result = true;
         return false;
     }
 
-    // Meteorite.Execute(GameState, DisasterOccurrence, Random) runs on every client for every meteorite occurrence. The lobby rule decides T
-    // (the game's own value when the rule is 0); this must NOT depend on the local cheat unlock, or a locked client would desync from the host.
-    internal static void MeteorExecutePrefix(object __instance)
+    // Meteorite.Execute runs on every client for every meteorite. The lobby rules decide (never the local unlock, or clients would desync).
+    internal static void MeteorExecute(object __instance)
     {
-        try { Meteor.ApplyBeforeExecute(__instance); }
-        catch (Exception e) { ModPlugin.L.LogWarning("[meteor] " + e.GetType().Name + ": " + e.Message); }
+        try { Meteor.BeforeExecute(__instance); }
+        catch (Exception e) { Plugin.L.LogWarning("meteor: " + e.Message); }
     }
 
-    // IslandGrid.MeteoriteNumberCastleTiles(int2 impact, int radius): "castle tiles within the impact radius".
-    // Reporting 0 makes Meteorite.Execute accept every random grass tile, so the castle is no longer protected. Follows the lobby rule on every client.
-    internal static void CastleTilesPostfix(ref int __result)
-    {
-        if (Meteor.ProtectionOff == null || !Meteor.ProtectionOff.Value) return;
-        if (Meteor.NeverHit != null && Meteor.NeverHit.Value) return;   // "never" wins over "always"
-        if (__result != 0) Meteor.CastleChecksOverridden++;
-        __result = 0;
-    }
+    // IslandGrid.MeteoriteNumberCastleTiles: "castle tiles within the impact radius". 0 makes every grass tile acceptable (castle not protected).
+    internal static void CastleTiles(ref int __result) { if (Meteor.CastleCanBeHit) __result = 0; }
 }
