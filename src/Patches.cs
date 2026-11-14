@@ -68,10 +68,11 @@ internal static class Patches
         catch (Exception ex) { Plugin.L.LogWarning("build anywhere: " + ex.Message); }
     }
 
-    // Player.get_StartGameReady: read by the lobby Start button.
+    // Player.get_StartGameReady: read by the lobby Start button, but also by every player's ready tick box. Only on the host: on a client the
+    // forced value showed its own tick box as always ready and the player could not untick it (and its clicks sent "ready" to the host).
     internal static bool StartGameReady(ref bool __result)
     {
-        if (!Plugin.On || !Options.ForceLobbyReady.Value) return true;
+        if (!Plugin.On || !Options.ForceLobbyReady.Value || !DiceModders.ModCore.ModCore.Lobby.IsHost) return true;
         __result = true;
         return false;
     }
