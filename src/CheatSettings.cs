@@ -18,12 +18,14 @@ internal static class CheatSettings
     {
         _ui = ui;
         if (_ui == null) return;
-        _ui.Native.Settings.AddBlock(new SettingsBlockSpec
+        Tx.Block(_ui, () => new SettingsBlockSpec
         {
-            Id = Plugin.Guid + ".lobby", Page = SettingsPage.Lobby, Title = "Mods", Order = 20,
-            Build = block => Toggle(block, "Force ready", Options.ForceLobbyReady),
+            Id = Plugin.Guid + ".lobby", Page = SettingsPage.Lobby, Title = Tx.T("block.mods"), Order = 20,
+            Build = block => Toggle(block, Tx.T("forceReady"), Options.ForceLobbyReady),
         });
         Options.Unlocked.SettingChanged += (_, _) => Gate();
+        // the Cheats block in the new language: made again only while it is there
+        DiceModders.ModCore.ModCore.Texts.LanguageChanged += () => { if (_cheats == null) return; _cheats.Dispose(); _cheats = null; Gate(); };
         Gate();
     }
 
@@ -33,14 +35,14 @@ internal static class CheatSettings
         if (Options.Unlocked.Value && _cheats == null)
             _cheats = _ui.Native.Settings.AddBlock(new SettingsBlockSpec
             {
-                Id = Plugin.Guid + ".cheats", Page = SettingsPage.Game, Title = "Cheats", Order = 900,
+                Id = Plugin.Guid + ".cheats", Page = SettingsPage.Game, Title = Tx.T("block.cheats"), Order = 900,
                 Build = block =>
                 {
-                    Toggle(block, "Developer console", Options.DevConsole);
-                    Toggle(block, "Unlock all buildings", Options.UnlockAllBuildings);
-                    Toggle(block, "Build anywhere (RISKY)", Options.BuildAnywhere);
-                    block.AddInfo("Meteor rules are set by the host in Settings > Lobby > Rules, under \"Cheats\". They apply to every player of the match.");
-                    block.AddButton("Hide the cheats", "Hide", () => Options.Unlocked.Value = false);
+                    Toggle(block, Tx.T("devConsole"), Options.DevConsole);
+                    Toggle(block, Tx.T("unlockAll"), Options.UnlockAllBuildings);
+                    Toggle(block, Tx.T("buildAnywhere"), Options.BuildAnywhere);
+                    block.AddInfo(Tx.T("meteorInfo"));
+                    block.AddButton(Tx.T("hideCheats"), Tx.T("hide"), () => Options.Unlocked.Value = false);
                 },
             });
         else if (!Options.Unlocked.Value && _cheats != null) { _cheats.Dispose(); _cheats = null; }

@@ -1,0 +1,21 @@
+{
+  // Texts of DiceKingdoms Cheats: English is needed, other languages fall back to it. Languages: en, de, fr, ru, uk, zh-CN.
+  // A file <DllName>.texts.json next to the DLL wins line by line, so players can fix or add texts without rebuilding.
+  // rule.<key>.title / .description / .choice.<n> and group.<key>.title translate lobby rules and headings (ModCore).
+  "group.cheats.title": { "en": "Cheats", "de": "Cheats", "fr": "Triches", "ru": "Читы", "uk": "Чити", "zh-CN": "作弊" },
+  "rule.cheats.meteor.castle.title": { "en": "Castle hits", "de": "Treffer auf die Burg", "fr": "Impacts sur le château", "ru": "Попадания в замок", "uk": "Влучання в замок", "zh-CN": "城堡被击中" },
+  "rule.cheats.meteor.castle.choice.0": { "en": "Game rule", "de": "Spielregel", "fr": "Règle du jeu", "ru": "Правило игры", "uk": "Правило гри", "zh-CN": "游戏规则" },
+  "rule.cheats.meteor.castle.choice.1": { "en": "Any meteor", "de": "Jeder Meteor", "fr": "Toute météorite", "ru": "Любой метеорит", "uk": "Будь-який метеорит", "zh-CN": "任何陨石" },
+  "rule.cheats.meteor.castle.choice.2": { "en": "Never", "de": "Nie", "fr": "Jamais", "ru": "Никогда", "uk": "Ніколи", "zh-CN": "从不" },
+  "rule.cheats.meteor.limitT.title": { "en": "Meteor limit T", "de": "Meteorgrenze T", "fr": "Limite météorite T", "ru": "Предел метеорита T", "uk": "Межа метеорита T", "zh-CN": "陨石上限 T" },
+  "rule.cheats.meteor.limitT.description": { "en": "0 = game (128). Higher = later hits.", "de": "0 = Spiel (128). Höher = spätere Treffer.", "fr": "0 = jeu (128). Plus haut = impacts plus tardifs.", "ru": "0 = как в игре (128). Больше = попадания позже.", "uk": "0 = як у грі (128). Більше = влучання пізніше.", "zh-CN": "0 = 游戏默认（128）。越大 = 越晚击中。" },
+  "block.mods": { "en": "Mods", "de": "Mods", "fr": "Mods", "ru": "Моды", "uk": "Моди", "zh-CN": "模组" },
+  "forceReady": { "en": "Force ready", "de": "Bereit erzwingen", "fr": "Forcer « prêt »", "ru": "Принудительно готов", "uk": "Примусово готовий", "zh-CN": "强制准备" },
+  "block.cheats": { "en": "Cheats", "de": "Cheats", "fr": "Triches", "ru": "Читы", "uk": "Чити", "zh-CN": "作弊" },
+  "devConsole": { "en": "Developer console", "de": "Entwicklerkonsole", "fr": "Console de développement", "ru": "Консоль разработчика", "uk": "Консоль розробника", "zh-CN": "开发者控制台" },
+  "unlockAll": { "en": "Unlock all buildings", "de": "Alle Gebäude freischalten", "fr": "Débloquer tous les bâtiments", "ru": "Открыть все здания", "uk": "Відкрити всі будівлі", "zh-CN": "解锁所有建筑" },
+  "buildAnywhere": { "en": "Build anywhere (RISKY)", "de": "Überall bauen (RISKANT)", "fr": "Construire n'importe où (RISQUÉ)", "ru": "Строить где угодно (РИСКОВАННО)", "uk": "Будувати будь-де (РИЗИКОВАНО)", "zh-CN": "随处建造（有风险）" },
+  "meteorInfo": { "en": "Meteor rules are set by the host in Settings > Lobby > Rules, under \"Cheats\". They apply to every player of the match.", "de": "Meteorregeln legt der Host unter Einstellungen > Lobby > Regeln unter „Cheats“ fest. Sie gelten für jeden Spieler der Partie.", "fr": "Les règles des météorites sont réglées par l'hôte dans Paramètres > Salon > Règles, sous « Triches ». Elles s'appliquent à tous les joueurs de la partie.", "ru": "Правила метеоритов задаёт хост в Настройки > Лобби > Правила, в разделе «Читы». Они действуют для всех игроков матча.", "uk": "Правила метеоритів задає хост у Налаштування > Лобі > Правила, у розділі «Чити». Вони діють для всіх гравців матчу.", "zh-CN": "陨石规则由房主在 设置 > 大厅 > 规则 的“作弊”标题下设置，对本局所有玩家生效。" },
+  "hideCheats": { "en": "Hide the cheats", "de": "Cheats ausblenden", "fr": "Masquer les triches", "ru": "Скрыть читы", "uk": "Сховати чити", "zh-CN": "隐藏作弊" },
+  "hide": { "en": "Hide", "de": "Ausblenden", "fr": "Masquer", "ru": "Скрыть", "uk": "Сховати", "zh-CN": "隐藏" }
+}
