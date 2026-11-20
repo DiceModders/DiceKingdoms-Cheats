@@ -20,7 +20,7 @@ public sealed class Plugin : BasePlugin
 {
     public const string Guid = "org.dicemodders.dicekingdoms.cheats";
     public const string Name = "DiceKingdoms Cheats";
-    public const string Version = "4.0.0";
+    public const string Version = "1.0.0";
 
     internal static ManualLogSource L;
     internal static bool On;

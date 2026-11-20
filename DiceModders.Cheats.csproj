@@ -5,7 +5,7 @@
     <AssemblyName>DiceModders.Cheats</AssemblyName>
     <RootNamespace>DiceModders.Cheats</RootNamespace>
     <Description>Cheats for Dice Kingdoms: dev console, unlock all buildings, build anywhere, meteor castle protection lobby rules, force lobby ready.</Description>
-    <Version>4.0.0</Version>
+    <Version>1.0.0</Version>
     <Authors>DiceModders</Authors>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
